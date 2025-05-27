@@ -2,13 +2,15 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("your-secret-key")
+var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -17,13 +19,13 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Missing or invalid token", http.StatusUnauthorized)
 			return
 		}
-
+		fmt.Println(authHeader)
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-
+		fmt.Println(tokenStr)
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
-
+		fmt.Println(err)
 		if err != nil || !token.Valid {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
